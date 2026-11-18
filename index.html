@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Boss — Exam Grade Typing Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Ambient Liquid Glass Background Orbs -->
+  <div class="ambient-glows">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <main id="app-container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon">&#9889;</div>
+        <div class="brand-title">
+          <h1>Typing Boss</h1>
+          <p>SSC CGL/CHSL &bull; Banking (IBPS/SBI) &bull; Competitive Exam Suite</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-custom-modal" class="glass-btn" title="Paste your own practice passage">
+          <span class="icon">&#9998;</span> Custom Passage
+        </button>
+        <button id="btn-open-history-modal" class="glass-btn" title="View past test records and stats">
+          <span class="icon">&#128202;</span> History
+        </button>
+        <button id="btn-toggle-sound" class="glass-btn active" title="Mechanical Sound">
+          <span class="icon">&#128266;</span> Sound
+        </button>
+      </div>
+    </header>
+
+    <!-- Controls & Exam Configurations Toolbar -->
+    <nav class="controls-toolbar" aria-label="Exam settings toolbar">
+      <div class="toolbar-group">
+        <label for="select-mode" class="toolbar-label">Mode:</label>
+        <select id="select-mode" class="glass-select">
+          <option value="ssc">SSC CGL / CHSL (DEST)</option>
+          <option value="banking">Banking (IBPS Clerk / PO)</option>
+          <option value="practice">Speed Practice (Fluid)</option>
+        </select>
+
+        <label for="select-duration" class="toolbar-label" style="margin-left: 10px;">Time:</label>
+        <select id="select-duration" class="glass-select">
+          <option value="60">1 Minute (Quick)</option>
+          <option value="120">2 Minutes</option>
+          <option value="300">5 Minutes</option>
+          <option value="600">10 Minutes (Standard)</option>
+          <option value="900" selected>15 Minutes (SSC Exam)</option>
+        </select>
+      </div>
+
+      <div class="toolbar-group">
+        <!-- Backspace Policy Toggle ("back pressure enable disable") -->
+        <button id="btn-toggle-backspace" class="glass-btn pill" title="Toggle backspace rules (SSC allowed, Banking disabled)">
+          Backspace: ON
+        </button>
+        <!-- Auto-Scroll Toggle -->
+        <button id="btn-toggle-autoscroll" class="glass-btn pill active" title="Automatically keep active text in view">
+          Auto-Scroll: ON
+        </button>
+      </div>
+
+      <div class="toolbar-group">
+        <button id="btn-restart-test" class="glass-btn" title="Reset test with current passage">
+          <span class="icon">&#8635;</span> Reset
+        </button>
+        <button id="btn-new-passage" class="glass-btn" title="Load next curated offline passage">
+          <span class="icon">&#128196;</span> Next Passage
+        </button>
+        <button id="btn-online-passage" class="glass-btn primary" title="Fetch dynamic text from random online API">
+          <span class="icon">&#127760;</span> Random Online
+        </button>
+      </div>
+    </nav>
+
+    <!-- Slim Horizontal Statistics Bar -->
+    <section class="stats-bar-slim" aria-label="Typing statistics">
+      <div class="stat-pill highlight">
+        <span class="stat-pill-label">Time</span>
+        <span id="stat-timer" class="stat-pill-val timer">15:00</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">Gross</span>
+        <span id="stat-gross-wpm" class="stat-pill-val">0</span>
+        <span class="stat-pill-unit">WPM</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">Net</span>
+        <span id="stat-net-wpm" class="stat-pill-val">0</span>
+        <span class="stat-pill-unit">WPM</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">Accuracy</span>
+        <span id="stat-accuracy" class="stat-pill-val">100%</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">Keystrokes</span>
+        <span id="stat-keystrokes" class="stat-pill-val">0</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">Mistakes</span>
+        <span id="stat-errors" class="stat-pill-val errors">0F / 0H</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="stat-pill-label">KDPH</span>
+        <span id="stat-kdph" class="stat-pill-val">0</span>
+      </div>
+    </section>
+
+    <!-- Typing Interactive Area: Master Passage on Top, 3-4 Line Input Box Below -->
+    <section class="typing-box-container" aria-label="Typing surface">
+      <!-- Passage Title & Target Information Bar -->
+      <div class="passage-info-bar">
+        <div id="passage-title-badge" class="passage-title-badge">
+          <span class="icon">&#128214;</span> SSC CGL Tier-II DEST: Indian Economy &amp; Fiscal Management
+        </div>
+        <div id="passage-target-info" class="passage-target-info">
+          1850 Keystrokes (~370 Std Words)
+        </div>
+      </div>
+
+      <!-- Passage Progress Track -->
+      <div class="passage-progress-track">
+        <div id="passage-progress-fill" class="passage-progress-fill"></div>
+      </div>
+
+      <!-- 1. Master Passage Upper Pane -->
+      <div id="master-passage-view" class="master-passage-view" tabindex="0">
+        <div id="text-display" class="text-display">
+          <!-- Dynamically populated word and character spans -->
+        </div>
+      </div>
+
+      <!-- 2. Typing Text Box Header & Counter -->
+      <div class="typing-input-header">
+        <span class="typing-input-title">&#9998; Your Typing Input (3-4 lines visible):</span>
+        <span id="typing-word-counter" class="typing-word-counter">Word 0 of 0</span>
+      </div>
+
+      <!-- 3. Visible Typing Text Box Directly Below Passage (3-4 lines height) -->
+      <textarea id="typing-input-box" class="typing-input-box" rows="3" placeholder="Click here or start typing the passage text directly..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Typing text box"></textarea>
+
+      <!-- 10 Second Auto-Pause Overlay -->
+      <div id="auto-pause-overlay" class="auto-pause-overlay" role="dialog" aria-modal="true" aria-label="Test Auto-Paused">
+        <div class="auto-pause-card">
+          <div class="pause-icon">&#10074;&#10074;</div>
+          <h3>Test Auto-Paused</h3>
+          <p>You have been inactive for 10 seconds. To protect your Words-Per-Minute (WPM) and official evaluation scores, the exam timer has been halted.</p>
+          <button id="btn-resume-autopause" class="glass-btn primary" style="padding: 10px 24px; font-size: 14px;">
+            &#9654; Resume Test (Or Press Any Key)
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detailed Results & Scorecard Modal -->
+  <div id="result-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Typing Test Scorecard">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Official Typing Evaluation Scorecard</h2>
+        <button id="btn-close-result" class="modal-close-btn" aria-label="Close Scorecard">&times;</button>
+      </div>
+
+      <!-- Verdict Banner (Qualified / Failed) -->
+      <div id="result-verdict-banner" class="verdict-banner verdict-pass">
+        <div class="verdict-icon">&#10004;</div>
+        <div class="verdict-content">
+          <h3>QUALIFIED / SELECTED</h3>
+          <p>Allowed Error: 7.00% &bull; Your Error: 1.25% &bull; Benchmark: 35 WPM</p>
+        </div>
+      </div>
+
+      <!-- Scorecard Metric Cards Grid -->
+      <div class="scorecard-grid">
+        <div class="scorecard-item">
+          <span class="item-label">Gross Speed</span>
+          <span id="res-gross-wpm" class="item-val">0</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Net Speed</span>
+          <span id="res-net-wpm" class="item-val">0</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Accuracy</span>
+          <span id="res-accuracy" class="item-val">0%</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Keystrokes (KDPH)</span>
+          <span id="res-keystrokes" class="item-val">0</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">SSC Error Rate</span>
+          <span id="res-error-pct" class="item-val">0%</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Full Mistakes (1.0)</span>
+          <span id="res-full-mistakes" class="item-val">0</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Half Mistakes (0.5)</span>
+          <span id="res-half-mistakes" class="item-val">0</span>
+        </div>
+        <div class="scorecard-item">
+          <span class="item-label">Backspaces Used</span>
+          <span id="res-backspaces" class="item-val">0</span>
+        </div>
+      </div>
+
+      <!-- Official SSC Evaluation Formula Explanation -->
+      <div class="formula-box">
+        <strong>Official SSC CGL/CHSL DEST Evaluation Formula:</strong><br>
+        &bull; <strong>Total Effective Mistakes</strong> = (Full Mistakes &times; 1.0) + (Half Mistakes &times; 0.5)<br>
+        &bull; <strong>Error Percentage</strong> = (Total Effective Mistakes / Total Master Words) &times; 100<br>
+        &bull; <strong>Net WPM</strong> = Gross WPM &minus; (Total Mistakes / Time in minutes). Time Taken: <span id="res-time-taken">15m 0s</span>.
+      </div>
+
+      <!-- Performance Canvas Graph -->
+      <div class="chart-container">
+        <canvas id="result-chart-canvas"></canvas>
+      </div>
+
+      <!-- Word-by-Word Mistake Review -->
+      <div class="diffs-container">
+        <h4>Detailed Mistake Audit &amp; Classification:</h4>
+        <ul id="result-word-diffs-list" class="diffs-list">
+          <!-- Dynamically populated diff list -->
+        </ul>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-copy-result" class="glass-btn">
+          <span class="icon">&#128203;</span> Copy Summary
+        </button>
+        <button id="btn-download-result" class="glass-btn">
+          <span class="icon">&#128424;</span> Print / Export Scorecard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Passage Modal -->
+  <div id="custom-passage-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Custom Passage Form">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Practice Custom Passage</h2>
+        <button id="btn-close-custom-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted);">Paste or write any text you want to practice with (e.g. newspaper editorials, court judgment copies, or exam excerpts):</p>
+      <textarea id="custom-text-input" class="custom-textarea" placeholder="Paste your text here (minimum 20 characters)..."></textarea>
+      <div class="modal-actions">
+        <button id="btn-apply-custom-text" class="glass-btn primary">Start Custom Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History & Previous Tests Modal -->
+  <div id="history-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Test History">
+    <div class="modal-card" style="max-width: 760px;">
+      <div class="modal-header">
+        <h2>Your Typing Test History</h2>
+        <button id="btn-close-history-modal" class="modal-close-btn">&times;</button>
+      </div>
+      <div style="overflow-x: auto; max-height: 350px;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date &amp; Time</th>
+              <th>Mode</th>
+              <th>Gross WPM</th>
+              <th>Net WPM</th>
+              <th>Accuracy</th>
+              <th>Error %</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- Populated from localStorage -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="justify-content: space-between;">
+        <button id="btn-clear-history" class="glass-btn warning">Clear History</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Main Script (ES Module) -->
+  <script type="module" src="js/app.js?v=1.5"></script>
+</body>
+</html>
